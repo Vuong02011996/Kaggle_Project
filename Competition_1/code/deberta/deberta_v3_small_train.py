@@ -22,7 +22,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 USE_REGRESSION = True
 
 # VERSION NUMBER FOR NAMING OF SAVED MODELS
-VER=2
+VER = 5
 
 # IF "LOAD_FROM" IS None, THEN WE TRAIN NEW MODELS
 # LOAD_FROM = "/kaggle/input/deberta-v3-small_1-finetuned-v1/"
@@ -38,18 +38,19 @@ print("Pass import library")
 
 
 class PATHS:
-    train_path = '/Competition_1/data/1_learning-agency-lab-automated-essay-scoring-2/train.csv'
-    test_path = '/Competition_1/data/1_learning-agency-lab-automated-essay-scoring-2/test.csv'
-    sub_path = '/Competition_1/data/1_learning-agency-lab-automated-essay-scoring-2/sample_submission.csv'
-    model_path = "/Competition_1/models/deberta-v3-small"
+    # train_path = '/home/oryza/Desktop/KK/Competition_1/data/1_learning-agency-lab-automated-essay-scoring-2/train.csv'
+    train_path = '/home/oryza/Desktop/KK/Competition_1/data/persuade_2.0_human_scores_demo_id_github.csv'
+    test_path = '/home/oryza/Desktop/KK/Competition_1/data/1_learning-agency-lab-automated-essay-scoring-2/test.csv'
+    sub_path = '/home/oryza/Desktop/KK/Competition_1/data/1_learning-agency-lab-automated-essay-scoring-2/sample_submission.csv'
+    model_pretrain_path = "/home/oryza/Desktop/KK/Competition_1/models/deberta-v3-small"
+    dir_save_model = f'/home/oryza/Desktop/KK/Competition_1/models/debearta_v3_small_retrain_v{VER}/'
 
-    dir_save_model = '/Competition_1/models/debearta_v3_small_retrain_v2/'
 
 class CFG:
     n_splits = 5
     seed = 42
     # max_length = 1024
-    max_length = 1440
+    max_length = 1024
     lr = 1e-5
     train_batch_size = 4
     eval_batch_size = 8
@@ -156,6 +157,9 @@ def compute_metrics_for_classification(eval_pred):
 
 def k_fold_train_valid_data():
     data = pd.read_csv(PATHS.train_path)
+    print(data.head())
+    data = data.rename(columns={"holistic_essay_score": "score"})
+    data = data.rename(columns={"essay_id_comp": "essay_id"})
 
     # data['score']: Lấy cột score từ DataFrame data. Đây là một Series chứa các giá trị của cột score.
     # .apply(lambda x: x-1): Sử dụng phương thức apply của Series để áp dụng một hàm lên từng giá trị của cột score.
@@ -222,11 +226,10 @@ training_args = TrainingArguments(
 
 def train(data):
     if COMPUTE_CV:
-
         # ADD NEW TOKENS for ("\n") new paragraph and (" "*2) double space
         # Tạo tokenizer từ mô hình được chỉ định bởi PATHS.model_path.
         # Thêm các token mới cho ký tự xuống dòng ("\n") và khoảng trắng kép (" ").
-        tokenizer = AutoTokenizer.from_pretrained(PATHS.model_path)
+        tokenizer = AutoTokenizer.from_pretrained(PATHS.model_pretrain_path)
         tokenizer.add_tokens([AddedToken("\n", normalized=False)])
         tokenizer.add_tokens([AddedToken(" " * 2, normalized=False)])
 
@@ -257,7 +260,7 @@ def train(data):
 
             # from_pretrained: Đây là một phương thức lớp (classmethod) của AutoConfig.
             # Nó tải cấu hình từ một mô hình đã được huấn luyện trước đó
-            config = AutoConfig.from_pretrained(PATHS.model_path)
+            config = AutoConfig.from_pretrained(PATHS.model_pretrain_path)
             if USE_REGRESSION:
                 config.attention_probs_dropout_prob = 0.0
                 config.hidden_dropout_prob = 0.0
@@ -270,7 +273,7 @@ def train(data):
                 model = AutoModelForSequenceClassification.from_pretrained(
                     LOAD_FROM + f'deberta-v3-small_AES2_fold_{fold}_v{VER}')
             else:
-                model = AutoModelForSequenceClassification.from_pretrained(PATHS.model_path, config=config)
+                model = AutoModelForSequenceClassification.from_pretrained(PATHS.model_pretrain_path, config=config)
                 # cập nhật số lượng token embeddings.
                 model.resize_token_embeddings(len(tokenizer))
 
@@ -296,19 +299,19 @@ def train(data):
 
             if LOAD_FROM is None:
                 trainer.train()
-
-            # PLOT CONFUSION MATRIX
+            #
+            # # PLOT CONFUSION MATRIX
             y_true = valid['score'].values
             predictions0 = trainer.predict(tokenized_valid).predictions
-            if USE_REGRESSION:
-                predictions = predictions0.round(0) + 1
-            else:
-                predictions = predictions0.argmax(axis=1) + 1
-            cm = confusion_matrix(y_true, predictions, labels=[x for x in range(1, 7)])
-            draw_cm = ConfusionMatrixDisplay(confusion_matrix=cm,
-                                             display_labels=[x for x in range(1, 7)])
-            draw_cm.plot()
-            plt.show()
+            # if USE_REGRESSION:
+            #     predictions = predictions0.round(0) + 1
+            # else:
+            #     predictions = predictions0.argmax(axis=1) + 1
+            # cm = confusion_matrix(y_true, predictions, labels=[x for x in range(1, 7)])
+            # draw_cm = ConfusionMatrixDisplay(confusion_matrix=cm,
+            #                                  display_labels=[x for x in range(1, 7)])
+            # draw_cm.plot()
+            # plt.show()
 
             # SAVE FOLD MODEL AND TOKENIZER
             if LOAD_FROM is None:
@@ -324,7 +327,7 @@ def train(data):
             else:
                 COLS = [f'p{x}' for x in range(CFG.num_labels)]
                 valid[COLS] = predictions0
-            valid.to_csv(f'valid_df_fold_{fold}_v{VER}.csv', index=False)
+            valid.to_csv(PATHS.dir_save_model + f'valid_df_fold_{fold}_v{VER}.csv', index=False)
 
 
 if __name__ == '__main__':

@@ -55,3 +55,5 @@ docs/_build/
 */models
 */models_train/*
 */output_v1/*
+*.csv
+Competition_1/code/deberta/python_run.py
