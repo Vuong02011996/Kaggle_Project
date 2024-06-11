@@ -56,4 +56,4 @@ docs/_build/
 */models_train/*
 */output_v1/*
 *.csv
-Competition_1/code/deberta/python_run.py
+Competition_1/debearta_v3_small_retrain_v5/*

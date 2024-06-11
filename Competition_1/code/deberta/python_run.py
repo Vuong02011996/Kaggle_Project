@@ -14,6 +14,7 @@ import random, os
 import numpy as np
 import torch
 
+print(torch.cuda.is_available())
 
 # os.environ["CUDA_VISIBLE_DEVICES"]="0,1"
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
@@ -22,7 +23,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 USE_REGRESSION = True
 
 # VERSION NUMBER FOR NAMING OF SAVED MODELS
-VER = 8
+VER = 7
 
 # IF "LOAD_FROM" IS None, THEN WE TRAIN NEW MODELS
 # LOAD_FROM = "/kaggle/input/deberta-v3-small_1-finetuned-v1/"
@@ -38,23 +39,21 @@ print("Pass import library")
 
 
 class PATHS:
-    train_path = '/home/oryza/Desktop/KK/Competition_1/data/1_learning-agency-lab-automated-essay-scoring-2/train.csv'
-    # train_path = '/home/oryza/Desktop/KK/Competition_1/data/persuade_2.0_human_scores_demo_id_github.csv'
-    test_path = '/home/oryza/Desktop/KK/Competition_1/data/1_learning-agency-lab-automated-essay-scoring-2/test.csv'
-    sub_path = '/home/oryza/Desktop/KK/Competition_1/data/1_learning-agency-lab-automated-essay-scoring-2/sample_submission.csv'
-    model_pretrain_path = "/home/oryza/Desktop/KK/Competition_1/models/deberta-v3-small"
-    dir_save_model = f'/home/oryza/Desktop/KK/Competition_1/models/debearta_v3_small_retrain_v{VER}/'
+    train_path = '/root/vuong/face_test/test/data/train.csv'
+    # train_path = '/root/vuong/face_test/test/data/persuade_2.0_human_scores_demo_id_github.csv'
+    model_pretrain_path = "/root/vuong/face_test/test/deberta-v3-small"
+    dir_save_model = f'/root/vuong/face_test/test/models/debearta_v3_small_retrain_v{VER}/'
 
 
 class CFG:
-    n_splits = 15
+    n_splits = 5
     seed = 42
     # max_length = 1024
-    max_length = 1024
+    max_length = 1536
     lr = 1e-5
-    train_batch_size = 4
+    train_batch_size = 8
     eval_batch_size = 8
-    train_epochs = 4
+    train_epochs = 10
     weight_decay = 0.01
     # warmup_ratio = 0.0
     warmup_ratio = 0.1
@@ -158,8 +157,8 @@ def compute_metrics_for_classification(eval_pred):
 def k_fold_train_valid_data():
     data = pd.read_csv(PATHS.train_path)
     print(data.head())
-    # data = data.rename(columns={"holistic_essay_score": "score"})
-    # data = data.rename(columns={"essay_id_comp": "essay_id"})
+    data = data.rename(columns={"holistic_essay_score": "score"})
+    data = data.rename(columns={"essay_id_comp": "essay_id"})
 
     # data['score']: Lấy cột score từ DataFrame data. Đây là một Series chứa các giá trị của cột score.
     # .apply(lambda x: x-1): Sử dụng phương thức apply của Series để áp dụng một hàm lên từng giá trị của cột score.
