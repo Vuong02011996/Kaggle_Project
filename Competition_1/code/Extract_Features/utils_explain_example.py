@@ -30,16 +30,29 @@ def explain_with_columns():
     # This method is used to add or modify columns in the DataFrame.
     df = df.with_columns(columns)
 
-    # Print the resulting DataFrame
-    # pl.Config.set_tbl_rows(df.shape[0])
-    # with pd.option_context('display.max_colwidth', None,
-    #                        'display.max_columns', None,
-    #                        'display.max_rows', None):
-    #     # display(df)
-    #     display(df)
     # show full dataframe in polars
     with pl.Config(fmt_str_lengths=1000):
         print(df)
+
+    """
+        shape: (3, 3)
+    ┌──────────┬──────────────────────────────────────────┬────────────────────────────────────────────┐
+    │ essay_id ┆ full_text                                ┆ paragraph                                  │
+    │ ---      ┆ ---                                      ┆ ---                                        │
+    │ i64      ┆ str                                      ┆ list[str]                                  │
+    ╞══════════╪══════════════════════════════════════════╪════════════════════════════════════════════╡
+    │ 1        ┆ This is the first paragraph of essay 1.  ┆ ["This is the first paragraph of essay     │
+    │          ┆                                          ┆ 1.", "This is the second paragraph of      │
+    │          ┆ This is the second paragraph of essay 1. ┆ essay 1."]                                 │
+    │ 2        ┆ This is the first paragraph of essay 2.  ┆ ["This is the first paragraph of essay     │
+    │          ┆                                          ┆ 2."]                                       │
+    │ 3        ┆ This is the first paragraph of essay 3.  ┆ ["This is the first paragraph of essay     │
+    │          ┆                                          ┆ 3.", "This is the second paragraph of      │
+    │          ┆ This is the second paragraph of essay 3. ┆ essay 3.", "This is the third paragraph of │
+    │          ┆                                          ┆ essay 3."]                                 │
+    │          ┆ This is the third paragraph of essay 3.  ┆                                            │
+    └──────────┴──────────────────────────────────────────┴────────────────────────────────────────────┘
+    """
 
 
 def explain_explode():
@@ -62,11 +75,27 @@ def explain_explode():
         print(df)
 
     # Explode the 'paragraph' column
+    # explode : nổ tung
     df_exploded = df.explode('paragraph')
 
     # Print exploded DataFrame
     print("\nExploded DataFrame:")
     print(df_exploded)
+    """
+    shape: (6, 2)
+    ┌──────────┬─────────────────────────────┐
+    │ essay_id ┆ paragraph                   │
+    │ ---      ┆ ---                         │
+    │ i64      ┆ str                         │
+    ╞══════════╪═════════════════════════════╡
+    │ 1        ┆ First paragraph of essay 1  │
+    │ 1        ┆ Second paragraph of essay 1 │
+    │ 2        ┆ First paragraph of essay 2  │
+    │ 3        ┆ First paragraph of essay 3  │
+    │ 3        ┆ Second paragraph of essay 3 │
+    │ 3        ┆ Third paragraph of essay 3  │
+    └──────────┴─────────────────────────────┘
+    """
 
 
 def explain_map_elements():
@@ -95,6 +124,22 @@ def explain_map_elements():
     print("\nDataFrame after adding 'processed_paragraph' column:")
     with pl.Config(fmt_str_lengths=1000):
         print(df)
+
+    """
+    shape: (3, 3)
+    ┌──────────┬───────────────────────────────────────────┬───────────────────────────────────────────┐
+    │ essay_id ┆ paragraph                                 ┆ processed_paragraph                       │
+    │ ---      ┆ ---                                       ┆ ---                                       │
+    │ i64      ┆ str                                       ┆ str                                       │
+    ╞══════════╪═══════════════════════════════════════════╪═══════════════════════════════════════════╡
+    │ 1        ┆ I'm happy! This is the first paragraph of ┆ i'm happy! this is the first paragraph of │
+    │          ┆ essay 1.                                  ┆ essay .                                   │
+    │ 2        ┆ This is the second paragraph of essay 2   ┆ this is the second paragraph of essay     │
+    │          ┆ with HTML <b>tags</b>.                    ┆ with html tags.                           │
+    │ 3        ┆ It's the third paragraph of essay 3.      ┆ it is the third paragraph of essay .      │
+    │          ┆ Check out http://example.com.             ┆ check out http://example.com.             │
+    └──────────┴───────────────────────────────────────────┴───────────────────────────────────────────┘
+    """
 
 
 def explain_star():
@@ -135,7 +180,97 @@ def explain_aggs():
     # ]
 
 
+def explain_group_by():
+    """
+    group_by(['essay_id']): Nhóm các hàng trong DataFrame theo giá trị của cột essay_id.
+    Các hàng có cùng giá trị essay_id sẽ được nhóm lại với nhau.
+    maintain_order=True: Đảm bảo rằng thứ tự của các nhóm được giữ nguyên như trong DataFrame gốc.
+    :return:
+    """
+    # Tạo DataFrame giả sử
+    data = {
+        "essay_id": [1, 1, 2, 2, 3, 3],
+        "paragraph": ["Para1", "Para2", "Para1", "Para2", "Para1", "Para2"],
+        "paragraph_len": [100, 150, 200, 250, 300, 350],
+    }
+
+    train_tmp = pl.DataFrame(data)
+
+    # Thực hiện group_by
+    grouped_df = train_tmp.group_by(['essay_id'], maintain_order=True)
+    with pl.Config(fmt_str_lengths=1000):
+        print(grouped_df.df)
+        """
+        shape: (6, 3)
+        ┌──────────┬───────────┬───────────────┐
+        │ essay_id ┆ paragraph ┆ paragraph_len │
+        │ ---      ┆ ---       ┆ ---           │
+        │ i64      ┆ str       ┆ i64           │
+        ╞══════════╪═══════════╪═══════════════╡
+        │ 1        ┆ Para1     ┆ 100           │
+        │ 1        ┆ Para2     ┆ 150           │
+        │ 2        ┆ Para1     ┆ 200           │
+        │ 2        ┆ Para2     ┆ 250           │
+        │ 3        ┆ Para1     ┆ 300           │
+        │ 3        ┆ Para2     ┆ 350           │
+        └──────────┴───────────┴───────────────┘
+        """
+
+    # Hiển thị các nhóm
+    for group in grouped_df:
+        print(group)
+
+
+def explain_function_agg():
+    """
+    Hàm .agg trong thư viện Polars được sử dụng để thực hiện các phép toán tổng hợp (aggregation)
+    trên các nhóm dữ liệu được tạo bởi hàm group_by
+    áp dụng các phép tổng hợp được xác định trong danh sách aggs lên từng nhóm
+    :return:
+    """
+    # Tạo DataFrame giả sử
+    data = {
+        "essay_id": [1, 1, 2, 2, 3, 3],
+        "paragraph_len": [100, 150, 200, 250, 300, 350],
+        "paragraph_error_num": [2, 1, 4, 3, 2, 5]
+    }
+
+    train_tmp = pl.DataFrame(data)
+
+    # Định nghĩa các phép tổng hợp
+    aggs = [
+        pl.col('paragraph_len').max().alias('max_paragraph_len'),
+        pl.col('paragraph_len').mean().alias('mean_paragraph_len'),
+        pl.col('paragraph_len').sum().alias('sum_paragraph_len'),
+        pl.col('paragraph_error_num').sum().alias('sum_paragraph_error_num'),
+    ]
+
+    # Thực hiện group_by và aggregate
+    result = train_tmp.group_by(['essay_id'], maintain_order=True).agg(aggs)
+
+    # Chuyển kết quả sang pandas DataFrame để hiển thị
+    # result_df = result.to_pandas()
+    with pl.Config(fmt_str_lengths=1000, tbl_cols=-1):
+        # cfg.set_tbl_cols(5)
+        # cfg.set_tbl_cols(result_df.width)
+        print(result)
+        """
+        shape: (3, 5)
+        ┌──────────┬───────────────────┬────────────────────┬───────────────────┬─────────────────────────┐
+        │ essay_id ┆ max_paragraph_len ┆ mean_paragraph_len ┆ sum_paragraph_len ┆ sum_paragraph_error_num │
+        │ ---      ┆ ---               ┆ ---                ┆ ---               ┆ ---                     │
+        │ i64      ┆ i64               ┆ f64                ┆ i64               ┆ i64                     │
+        ╞══════════╪═══════════════════╪════════════════════╪═══════════════════╪═════════════════════════╡
+        │ 1        ┆ 150               ┆ 125.0              ┆ 250               ┆ 3                       │
+        │ 2        ┆ 250               ┆ 225.0              ┆ 450               ┆ 7                       │
+        │ 3        ┆ 350               ┆ 325.0              ┆ 650               ┆ 7                       │
+        └──────────┴───────────────────┴────────────────────┴───────────────────┴─────────────────────────┘
+        """
+
+
 if __name__ == '__main__':
     # explain_with_columns()
     # explain_explode()
-    explain_map_elements()
+    # explain_map_elements()
+    # explain_group_by()
+    explain_function_agg()

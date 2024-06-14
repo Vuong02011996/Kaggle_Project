@@ -28,7 +28,6 @@ def Sentence_Eng(train_tmp):
         *[pl.col(fea).kurtosis().alias(f"{fea}_kurtosis") for fea in sentence_fea],
         *[pl.col(fea).quantile(0.25).alias(f"{fea}_q1") for fea in sentence_fea],
         *[pl.col(fea).quantile(0.75).alias(f"{fea}_q3") for fea in sentence_fea],
-
     ]
     df = train_tmp.group_by(['essay_id'], maintain_order=True).agg(aggs).sort("essay_id")
     df = df.to_pandas()

@@ -20,4 +20,34 @@
 
 # Show all dataframe in polars
 + https://stackoverflow.com/questions/75929721/how-to-show-full-column-width-of-polars-dataframe-in-python
-+ 
+
+
+# Python scikit svm "Vocabulary not fitted or provided"
++ https://stackoverflow.com/questions/60472925/python-scikit-svm-vocabulary-not-fitted-or-provided
++ NO CHANGE: transform(infer) -> fit_transform(train)
++ Cause error:
+## Error when inference with CountVectorizer
+  + ValueError: Number of features of the model must match the input. Model n_features_ is 2219 and input n_features is 1844
+    + train: 2219 words <=> num of features
+    + test: 1844 words <=> num of features
+    `proba= model.predict(test_feats[feature_names])+ a`
+  + FIX: Save vectorizer_cnt to pickle and load when infer:
+    ```
+       with open(path_vectorizer_models + 'vectorizer_cnt.pkl', 'wb') as f:
+            pickle.dump(vectorizer_cnt, f)
+    ```
+
+# ModuleNotFoundError: No module named 'Competition_1' when infer
++ Only save file pickle and have f before
+    ```
+     Save the fitted vectorizer
+        with open(f'vectorizer_cnt.pkl', 'wb') as f:
+            pickle.dump(vectorizer_cnt, f)
+    ```
+# pickle.PicklingError: Can't pickle <function <lambda> at 0x7f9a7d971da0>: attribute lookup <lambda> 
++ change `tokenizer=lambda x: x,`
++ to
+    ```commandline
+    def identity_tokenizer(x):
+        return x
+    ```

@@ -57,3 +57,4 @@ docs/_build/
 */output_v1/*
 *.csv
 Competition_1/debearta_v3_small_retrain_v5/*
+*.pkl

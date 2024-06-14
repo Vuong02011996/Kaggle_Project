@@ -64,3 +64,27 @@ sau đó meta model sẽ học cách kết hợp kết quả dự báo của m�
   + LightGBM phát triển tree dựa trên leaf-wise, trong khi hầu hết các boosting tool khác (kể cả xgboost) dựa trên level (depth)-wise
   
 # LightGBM 
++ LGBMRegressor: triển khai của mô hình Gradient Boosting Decision Trees với nhiều cải tiến và tối ưu hóa đặc trưng của LightGBM
++ GBDT: kết hợp nhiều cây quyết định (decision trees) lại với nhau để tạo thành một mô hình mạnh mẽ hơn
++ Ý tưởng chính là xây dựng các cây quyết định mới để sửa lỗi của các cây đã được xây dựng trước đó.
+  + Decision Trees:
+    + Decision Trees (Cây Quyết Định) là một mô hình học máy được sử dụng cho các bài toán phân loại và hồi quy
+    + Decision Trees biểu diễn các quyết định và các hậu quả có thể có của chúng, thông qua một cấu trúc giống như cây.
+
+    ```text
+                          [Weather]
+                       /      |      \
+                  Sunny    Overcast   Rainy
+                 /    \                /    \
+         [Humidity]   No           Weak   Strong
+           /    \                      /       \
+          High  Normal                Yes       No
+          /         \
+         No         Yes
+    Cách đọc cây quyết định
+    Nếu Weather là Sunny và Humidity là High, quyết định là No.
+    Nếu Weather là Sunny và Humidity là Normal, quyết định là Yes.
+    Nếu Weather là Overcast, quyết định luôn là Yes.
+    Nếu Weather là Rainy và Wind là Weak, quyết định là Yes.
+    Nếu Weather là Rainy và Wind là Strong, quyết định là No.
+    ```
