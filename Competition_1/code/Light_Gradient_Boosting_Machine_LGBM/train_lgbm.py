@@ -82,6 +82,7 @@ def train(train_feats):
 
     # Train
     n_splits = 18
+    # n_splits = 30
 
     skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=0)
 
@@ -133,6 +134,23 @@ def train(train_feats):
             class_weight='balanced',
             verbosity=- 1)
 
+        # model = lgb.LGBMRegressor(
+        #         objective = qwk_obj,
+        #         metrics = 'None',
+        #         learning_rate = 0.05,
+        #         max_depth = 8,
+        #         num_leaves = 10,
+        #         colsample_bytree=0.3,
+        #         reg_alpha = 0.7,
+        #         reg_lambda = 0.1,
+        #         n_estimators=700,
+        #         random_state=42,
+        #         extra_trees=True,
+        #         class_weight='balanced',
+        #         # device='gpu' if CUDA_AVAILABLE else 'cpu',
+        #         verbosity = - 1
+        #     )
+
         predictor = model.fit(X_train_fold,
                               y_train_fold,
                               eval_names=['train', 'valid'],
@@ -166,7 +184,7 @@ def train(train_feats):
 
     print(f'Mean F1 score across {n_splits} folds: {mean_f1_score}')
     print(f'Mean Cohen kappa score across {n_splits} folds: {mean_kappa_score}')
-    with open(f'models_lgbm_no_para_tf_id_counter_v{VER}.pkl', 'wb') as f:
+    with open(f'models_lgbm_v{VER}.pkl', 'wb') as f:
         pickle.dump(models, f)
 
     return models
