@@ -24,10 +24,14 @@ vectorizer = TfidfVectorizer(
             strip_accents='unicode',
             analyzer='word',
             # ngram_range=(3,6),
-            ngram_range=(2,3),
+            ngram_range=(1, 2),
             min_df=0.05,
             max_df=0.95,
-            sublinear_tf=True,
+            # # # Ngưỡng Loại bỏ từ xuất hiện quá ít
+            # min_df=0.10,
+            # # Ngưỡng loại bỏ từ xuất hiện quá nhiều lần
+            # max_df=0.85,
+            # sublinear_tf=True,
 )
 
 

@@ -191,5 +191,16 @@ def train(train_feats):
 
 
 if __name__ == '__main__':
-    train_feats = extract_features()
-    models = train(train_feats)
+    # train_feats = extract_features()
+    # add Deberta predictions to LGBM as features
+    deberta_oof = joblib.load('/home/oryza/Desktop/KK/Competition_1/data/aes2_400_20240419134941_oof.pkl')
+    print(deberta_oof[1])
+    print(deberta_oof.shape)
+    # print(deberta_oof.shape, train_feats.shape)
+    # for i in range(6):
+    #     train_feats[f'deberta_oof_{i}'] = deberta_oof[:, i]
+    # feature_names = list(filter(lambda x: x not in ['essay_id', 'score'], train_feats.columns))
+    # print('Features Number: ', len(feature_names))
+    # print(train_feats.shape)
+    #
+    # models = train(train_feats)

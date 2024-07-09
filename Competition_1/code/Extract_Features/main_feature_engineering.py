@@ -8,6 +8,7 @@ from Competition_1.code.Extract_Features.D_CountVectorizer_Features import vecto
 from Competition_1.code.Extract_Features.E_Tf_idf_features import vectorizer
 import time
 import pickle
+import os
 
 """
 columns là một danh sách chứa các biểu thức xử lý cột được định nghĩa bằng cách sử dụng Polars.
@@ -41,14 +42,27 @@ with pl.Config(fmt_str_lengths=1000):
 def extract_features():
     """Paragraph preprocess"""
     start_time = time.time()
-    tmp = Paragraph_Preprocess(train)
-    train_feats = Paragraph_Eng(tmp)
-    train_feats['score'] = train['score']
+
+    # Load the DataFrame from the pickle file
+    pickle_file = 'train_feats.pkl'
+    if os.path.exists(pickle_file):
+        with open(pickle_file, 'rb') as file:
+            train_feats = pickle.load(file)
+        print("DataFrame loaded from train_feats.pkl")
+    else:
+        tmp = Paragraph_Preprocess(train)
+        train_feats = Paragraph_Eng(tmp)
+        train_feats['score'] = train['score']
+        # Save the DataFrame to a pickle file
+        with open('train_feats.pkl', 'wb') as file:
+            pickle.dump(train_feats, file)
+        print("DataFrame saved to train_feats.pkl")
+
     feature_names = list(filter(lambda x: x not in ['essay_id', 'score'], train_feats.columns))
     print('Number of Features: ', len(feature_names))
     # train_feats is pandas not polars
-    pd.set_option('display.max_columns', None)
-    print(train_feats.head(3))
+    # pd.set_option('display.max_columns', None)
+    # print(train_feats.head(3))
     print("Paragraph preprocess cost: ", time.time() - start_time)
 
     """Sentence preprocess"""
@@ -62,8 +76,8 @@ def extract_features():
     feature_names = list(filter(lambda x: x not in ['essay_id', 'score'], train_feats.columns))
     print('Features Number after Sentence preprocess: ', len(feature_names))
     # train_feats is pandas not polars
-    pd.set_option('display.max_columns', None)
-    print(train_feats.head(3))
+    # pd.set_option('display.max_columns', None)
+    # print(train_feats.head(3))
     print("Sentence preprocess cost: ", time.time() - start_time)
 
     start_time = time.time()
@@ -75,8 +89,8 @@ def extract_features():
     feature_names = list(filter(lambda x: x not in ['essay_id', 'score'], train_feats.columns))
     print('Features Number after Word preprocess: ', len(feature_names))
     # train_feats is pandas not polars
-    pd.set_option('display.max_columns', None)
-    print(train_feats.head(3))
+    # pd.set_option('display.max_columns', None)
+    # print(train_feats.head(3))
     print("Word preprocess cost: ", time.time() - start_time)
 
     """TfidfVectorizer"""
@@ -91,12 +105,11 @@ def extract_features():
     feature_names = list(filter(lambda x: x not in ['essay_id', 'score'], train_feats.columns))
     print('Number of Features: ', len(feature_names))
     pd.set_option('display.max_columns', None)
-    print("TfidfVectorizer features: ")
-    print(train_feats.head(3))
+    # print("TfidfVectorizer features: ")
+    # print(train_feats.head(3))
     print("TfidfVectorizer cost: ", time.time() - start_time)
-    with open(f'vectorizer_2_3.pkl', 'wb') as f:
+    with open(f'vectorizer_1_2.pkl', 'wb') as f:
         pickle.dump(vectorizer, f)
-
 
     """CountVectorizer"""
     start_time = time.time()
@@ -113,7 +126,7 @@ def extract_features():
     print("CountVectorizer cost: ", time.time() - start_time)
 
     # Save the fitted vectorizer
-    with open(f'vectorizer_cnt_2_3.pkl', 'wb') as f:
+    with open(f'vectorizer_cnt_1_2.pkl', 'wb') as f:
         pickle.dump(vectorizer_cnt, f)
 
     return train_feats
