@@ -1,5 +1,8 @@
 import torch
 import numpy as np
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+
 
 def explain_last_hidden_state():
     # last_hidden_state is [batch_size, sequence_length, hidden_size]
@@ -61,6 +64,7 @@ def explain_vstack_hstack():
      [0.4 0.5 0.6 1.  1.1 1.2 1.6 1.7 1.8]]
     """
 
+
 def explain_transpose():
     """
     np.transpose: Reorders the dimensions of the array. It does not change the number of elements or their layout in memory but rather changes the way dimensions are accessed.
@@ -102,6 +106,85 @@ def explain_transpose():
     #         [7, 8]])
 
 
+def explain_idxmax():
+    # Create a toy dataset with one-hot encoded target columns
+    data = {
+        'feature1': [0.1, 0.2, 0.3, 0.4],
+        'feature2': [1.1, 1.2, 1.3, 1.4],
+        'target_A': [1, 0, 0, 1],
+        'target_B': [0, 1, 0, 0],
+        'target_C': [0, 0, 1, 0]
+    }
+
+    train = pd.DataFrame(data)
+
+    # Define the target columns
+    target_columns = ['target_A', 'target_B', 'target_C']
+
+    # Use idxmax to find the original categories
+    # to find the index of the maximum value along a specific axis
+    # axis=1 means that we are looking for the maximum value index along the columns for each row.
+    y = train[target_columns].idxmax(axis=1)
+
+    print("Original DataFrame:")
+    print(train)
+    """
+       feature1  feature2  target_A  target_B  target_C
+    0       0.1       1.1         1         0         0
+    1       0.2       1.2         0         1         0
+    2       0.3       1.3         0         0         1
+    3       0.4       1.4         1         0         0
+    """
+    print("\nExtracted Target Labels:")
+    print(y)
+    """
+    Extracted Target Labels:
+    0    target_A
+    1    target_B
+    2    target_C
+    3    target_A
+    dtype: object
+    """
+
+
+def explain_label_encoding():
+    # Create a toy dataset with one-hot encoded target columns
+    data = {
+        'feature1': [0.1, 0.2, 0.3, 0.4],
+        'feature2': [1.1, 1.2, 1.3, 1.4],
+        'target_A': [1, 0, 0, 1],
+        'target_B': [0, 1, 0, 0],
+        'target_C': [0, 0, 1, 0]
+    }
+
+    train = pd.DataFrame(data)
+
+    # Define the target columns
+    target_columns = ['target_A', 'target_B', 'target_C']
+
+    # Use idxmax to find the original categories
+    y = train[target_columns].idxmax(axis=1)
+
+    print("Original Target Labels:")
+    print(y)
+
+    # Encode labels
+    # Creates an instance of LabelEncoder to convert categorical labels to numerical labels.
+    label_encoder = LabelEncoder()
+    # Fits the label encoder to the target labels and transforms them into numerical labels.
+    y_encoded = label_encoder.fit_transform(y)
+
+    print("\nEncoded Target Labels:")
+    print(y_encoded)  # [0 1 2 0]
+
+    # To show the mapping from original labels to encoded labels
+    print("\nLabel Mapping:")
+    label_mapping = dict(zip(label_encoder.classes_, range(len(label_encoder.classes_))))
+    print(label_mapping)  # {'target_A': 0, 'target_B': 1, 'target_C': 2}
+
+
 if __name__ == '__main__':
     # explain_last_hidden_state()
-    explain_vstack_hstack()
+    # explain_vstack_hstack()
+    # explain_idxmax()
+    explain_label_encoding()

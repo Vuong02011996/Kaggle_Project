@@ -1,5 +1,12 @@
 + https://viblo.asia/p/cac-ky-thuat-tuning-mo-hinh-large-language-model-llm-aAY4qeZw4Pw
 
+# Content 
++ [History ](#history-)
++ [Fine-Tuning LLMs](#fine-tuning-llms)
++ [Instruction Finetuning LLMs](#instruction-finetuning-llms)
++ [Catastrophic forgetting](#catastrophic-forgetting)
++ [Parameter Efficient Finetuning (PEFT)](#parameter-efficient-finetuning-peft)
+
 # History 
 + Sự phát triển của Large language Model có thể được chia làm 4 bước ngoặt chính:
   + **Statistical languauge model (SLM)**

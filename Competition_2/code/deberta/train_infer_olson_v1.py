@@ -19,10 +19,9 @@ import gensim
 import itertools
 from gensim.utils import simple_preprocess
 from gensim.models import Word2Vec
-
-from transformers import DebertaV2Tokenizer, DebertaV2Model
 import torch
 import time
+import joblib
 
 
 pd.set_option('display.max_columns', None)
@@ -32,10 +31,10 @@ train = pd.read_csv("/home/oryza/Desktop/KK/Competition_2/data/train.csv")
 test = pd.read_csv("/home/oryza/Desktop/KK/Competition_2/data/test.csv")
 
 # for training on small part of train data
-quick_test = False
+quick_test = True
 
 # override quick_test if we detect actual test data... (to prevent submission sadness)
-if (len(test)) > 3: quick_test = False
+# if (len(test)) > 3: quick_test = False
 
 if quick_test: train = train.head(5000)
 
@@ -44,29 +43,6 @@ target_columns = ['winner_model_a', 'winner_model_b', 'winner_tie']
 columns_to_vectorize = ["prompt", "response_a", "response_b"]
 
 print(train.head(5))
-
-
-"""
-Deberta: Function to extract text features¶
-("tx" in variable / function names refers to "transformer")
-"""
-# Load DeBERTa tokenizer and model
-"""
-Tokenizer: 
-    + Splits the text into tokens (e.g., words, subwords, or characters) based on the model's vocabulary
-    + Converts raw text to token IDs.
-    + Output: Tokenized and encoded input (numerical IDs).
-Model: 
-    + Processes token IDs to produce outputs (e.g., embeddings, predictions).
-    + Output: Embeddings, hidden states, or predictions.
-        + Forward Pass: Passes the tokenized inputs through the model layers to produce outputs such as hidden states, logits, or embeddings.
-        + Feature Extraction: Extracts features from the hidden states which can be used for downstream tasks.
-        + Inference: Produces predictions or embeddings from the input data.
-"""
-tokenizer = DebertaV2Tokenizer.from_pretrained('/home/oryza/Desktop/KK/Competition_1/models/deberta-v3-small')
-
-# .cuda() moves the model to the GPU for faster computation.
-tx_model = DebertaV2Model.from_pretrained('/home/oryza/Desktop/KK/Competition_1/models/deberta-v3-small').cuda()
 
 
 def batch_extract_tx_features(texts, tokenizer, model, batch_size=16, max_length=1024):
@@ -144,7 +120,6 @@ def get_tx_vectors(df):
     avg_dif = vectors[:, 1, :] - vectors[:, 2, :]
     avg_dif = avg_dif.reshape(vectors.shape[0], 1, vectors.shape[2])
     vectors = np.concatenate((vectors, avg_dif), axis=1)
-
     vectors = np.array(vectors).reshape(len(vectors), -1)
     return vectors
 
@@ -193,6 +168,7 @@ def get_w2v_doc_vector(model, tokens, mode="mean"):
     default_vector = X[False == X.isnull()].mean()
 
     return np.stack([replace_nan_with_default(vector, default_vector) for vector in X])
+
 
 """Word2Vec: Vectorize prompt and both responses¶
 + Word2Vec is used to generate mean, min and max vectors for the prompt and both responses
@@ -309,6 +285,11 @@ model.fit(
     eval_metric='multi_logloss',
     callbacks=[callback]
 )
+
+model_filename = 'Competition_2/code/deberta/lightgbm_model.pkl'
+# Save the model to disk to load inference
+joblib.dump(model, model_filename)
+print(f"Model saved to {model_filename}")
 
 y_pred_proba = model.predict_proba(X_test)
 
