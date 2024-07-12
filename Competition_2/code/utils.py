@@ -183,8 +183,54 @@ def explain_label_encoding():
     print(label_mapping)  # {'target_A': 0, 'target_B': 1, 'target_C': 2}
 
 
+def explain_re_findall():
+    import re
+    from sklearn.feature_extraction.text import TfidfVectorizer
+
+    # Sample text
+    text = "Hello, world! This is a test."
+
+    """
+    This tokenizer will split the input text into tokens (words) by finding all sequences of word characters and 
+    ignoring any non-word characters
+    """
+    # Custom tokenizer using lambda function and regex pattern
+    tokenizer = lambda x: re.findall(r'[^\W]+', x)
+
+    # Apply the tokenizer to the sample text
+    tokens = tokenizer(text)
+    # Output the tokens
+    print(tokens)
+    # ['Hello', 'world', 'This', 'is', 'a', 'test']
+
+    # Using token_pattern instead of tokenizer
+    tfidf_vectorizer = TfidfVectorizer(
+        ngram_range=(1, 5),  # Consider n-grams from 1 to 5 words
+        token_pattern=r'[^\W]+',  # Equivalent regular expression pattern
+        strip_accents='unicode',  # Remove accents and convert characters to Unicode
+        min_df=4,  # Ignore terms that appear in fewer than 4 documents
+        max_features=300  # Limit the number of features to 300
+    )
+
+    # Example usage with sample text data
+    sample_texts = [
+        "Hello, world! This is a test.",
+        "Another test, with more words."
+    ]
+
+    # Fit and transform the sample text data
+    tfidf_matrix = tfidf_vectorizer.fit_transform(sample_texts)
+
+    # Output the feature names
+    print(tfidf_vectorizer.get_feature_names_out())
+
+    # Output the TF-IDF matrix
+    print(tfidf_matrix.toarray())
+
+
 if __name__ == '__main__':
     # explain_last_hidden_state()
     # explain_vstack_hstack()
     # explain_idxmax()
-    explain_label_encoding()
+    # explain_label_encoding()
+    explain_re_findall()

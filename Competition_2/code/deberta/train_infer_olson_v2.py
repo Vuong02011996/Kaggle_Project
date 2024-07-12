@@ -31,6 +31,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 import gensim
 
 from Competition_2.code.deberta.extract_features_from_deberta import get_tx_vectors
+from Competition_2.code.tfidf_vectorizer.extract_feature_from_tfidf_vectorizer import get_tfidf_vectors
+from Competition_2.code.word2vector.extract_feature_from_word2vector import get_word2vec_vectors, \
+    extract_feature_word2vector
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -51,7 +54,7 @@ target_columns = ['winner_model_a', 'winner_model_b', 'winner_tie']
 columns_to_vectorize = ["prompt", "response_a", "response_b"]
 
 print(train.head(5))
-ver_train = "only_deberta_feature_1440_find_subsample"
+ver_train = "only_tfidf"
 
 
 def train_lgbm(combined_train_vectors):
@@ -375,31 +378,52 @@ def train_lgbm_fold(combined_train_vectors):
 
 
 if __name__ == '__main__':
-    # Define the path to the saved feature file
-    feature_file_path = os.path.join(".", 'tx_train_vectors_1440.npz')
+    # # Define the path to the saved feature file
+    # feature_file_path = os.path.join(".", 'tx_train_vectors_1440.npz')
+    #
+    # # Check if the feature file exists
+    # if os.path.exists(feature_file_path):
+    #     # Load the features from the file
+    #     start_time = time.time()
+    #     tx_train_vectors_csr = load_npz(feature_file_path)
+    #     tx_train_vectors = tx_train_vectors_csr.toarray()
+    #     print("Loaded features from file.")
+    #     print("get_tx_vectors cost: ", time.time() - start_time, "seconds")
+    #     print("tx_train_vectors.shape: ", tx_train_vectors.shape)
+    # else:
+    #     # If the file doesn't exist, extract and save the features
+    #     start_time = time.time()
+    #     tx_train_vectors = get_tx_vectors(train, columns_to_vectorize)
+    #     print("get_tx_vectors cost: ", time.time() - start_time, "seconds")
+    #     print("tx_train_vectors.shape: ", tx_train_vectors.shape)
+    #
+    #     tx_train_vectors_csr = csr_matrix(tx_train_vectors)
+    #     save_npz(feature_file_path, tx_train_vectors_csr)
+    #     print("Extracted and saved features to file.")
+    #
+    # "-------------------------------------------------------------------------------------------------------"
+    # combined_train_vectors = tx_train_vectors
 
-    # Check if the feature file exists
-    if os.path.exists(feature_file_path):
-        # Load the features from the file
-        start_time = time.time()
-        tx_train_vectors_csr = load_npz(feature_file_path)
-        tx_train_vectors = tx_train_vectors_csr.toarray()
-        print("Loaded features from file.")
-        print("get_tx_vectors cost: ", time.time() - start_time, "seconds")
-        print("tx_train_vectors.shape: ", tx_train_vectors.shape)
-    else:
-        # If the file doesn't exist, extract and save the features
-        start_time = time.time()
-        tx_train_vectors = get_tx_vectors(train, columns_to_vectorize)
-        print("get_tx_vectors cost: ", time.time() - start_time, "seconds")
-        print("tx_train_vectors.shape: ", tx_train_vectors.shape)
+    # word2vector features
 
-        tx_train_vectors_csr = csr_matrix(tx_train_vectors)
-        save_npz(feature_file_path, tx_train_vectors_csr)
-        print("Extracted and saved features to file.")
+    # start_time = time.time()
+    # vectors = extract_feature_word2vector(train)
+    # vectors.save("word2vec_trained.model")
+    # print("extract_feature_word2vector cost: ", time.time() - start_time, "seconds")
+    #
+    # start_time = time.time()
+    # word2vec_train_vectors = get_word2vec_vectors(train, vectors, columns_to_vectorize)
+    # print("get_word2vec_vectors cost: ", time.time() - start_time, "seconds")
+    # word2vec_train_vectors_csr = csr_matrix(word2vec_train_vectors)
+    # save_npz(os.path.join(".", 'word2vec_train_vectors.npz'), word2vec_train_vectors_csr)
 
-    "-------------------------------------------------------------------------------------------------------"
-    combined_train_vectors = tx_train_vectors
-    train_lgbm_find_subsample(combined_train_vectors)
+    # tfidf features
+    start_time = time.time()
+    tfidf_train_vectors = get_tfidf_vectors(train, columns_to_vectorize)
+    print("get_tfidf_vectors cost: ", time.time() - start_time, "seconds")
+    tfidf_train_vectors_csr = csr_matrix(tfidf_train_vectors)
+    save_npz(os.path.join(".", 'tfidf_train_vectors.npz'), tfidf_train_vectors_csr)
+
+    train_lgbm(tfidf_train_vectors)
 
 

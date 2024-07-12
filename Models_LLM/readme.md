@@ -21,6 +21,7 @@
 + Công ty này đã tạo ra cú nổ đầu tiên vào tháng 6/2023, sau đó tiếp tục tích cực phát hành nhiều mô hình nguồn mở và được đón nhận nồng nhiệt.
 
 ## Gemma
++ gemma-2 is available from transformers>=4.42.3
 + Gemma 7B của Google
 
 
