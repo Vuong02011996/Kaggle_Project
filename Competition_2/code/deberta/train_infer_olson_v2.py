@@ -54,7 +54,7 @@ target_columns = ['winner_model_a', 'winner_model_b', 'winner_tie']
 columns_to_vectorize = ["prompt", "response_a", "response_b"]
 
 print(train.head(5))
-ver_train = "only_tfidf"
+ver_train = "deberta_large"
 
 
 def train_lgbm(combined_train_vectors):
@@ -289,7 +289,7 @@ def train_lgbm_find_subsample(combined_train_vectors):
 
 
 def train_lgbm_fold(combined_train_vectors):
-    model_filename = f'{ver_train}_lightgbm_model.pkl'
+    model_filename = f'{ver_train}_lightgbm_model_fold.pkl'
     max_estimators = 2000
     early_stopping_limit = 100
     n_splits = 5
@@ -378,31 +378,31 @@ def train_lgbm_fold(combined_train_vectors):
 
 
 if __name__ == '__main__':
-    # # Define the path to the saved feature file
-    # feature_file_path = os.path.join(".", 'tx_train_vectors_1440.npz')
-    #
-    # # Check if the feature file exists
-    # if os.path.exists(feature_file_path):
-    #     # Load the features from the file
-    #     start_time = time.time()
-    #     tx_train_vectors_csr = load_npz(feature_file_path)
-    #     tx_train_vectors = tx_train_vectors_csr.toarray()
-    #     print("Loaded features from file.")
-    #     print("get_tx_vectors cost: ", time.time() - start_time, "seconds")
-    #     print("tx_train_vectors.shape: ", tx_train_vectors.shape)
-    # else:
-    #     # If the file doesn't exist, extract and save the features
-    #     start_time = time.time()
-    #     tx_train_vectors = get_tx_vectors(train, columns_to_vectorize)
-    #     print("get_tx_vectors cost: ", time.time() - start_time, "seconds")
-    #     print("tx_train_vectors.shape: ", tx_train_vectors.shape)
-    #
-    #     tx_train_vectors_csr = csr_matrix(tx_train_vectors)
-    #     save_npz(feature_file_path, tx_train_vectors_csr)
-    #     print("Extracted and saved features to file.")
-    #
-    # "-------------------------------------------------------------------------------------------------------"
-    # combined_train_vectors = tx_train_vectors
+    # Define the path to the saved feature file
+    feature_file_path = os.path.join(".", 'tx_train_vectors_1440_deberta_large.npz')
+
+    # Check if the feature file exists
+    if os.path.exists(feature_file_path):
+        # Load the features from the file
+        start_time = time.time()
+        tx_train_vectors_csr = load_npz(feature_file_path)
+        tx_train_vectors = tx_train_vectors_csr.toarray()
+        print("Loaded features from file.")
+        print("get_tx_vectors cost: ", time.time() - start_time, "seconds")
+        print("tx_train_vectors.shape: ", tx_train_vectors.shape)
+    else:
+        # If the file doesn't exist, extract and save the features
+        start_time = time.time()
+        tx_train_vectors = get_tx_vectors(train, columns_to_vectorize)
+        print("get_tx_vectors cost: ", time.time() - start_time, "seconds")
+        print("tx_train_vectors.shape: ", tx_train_vectors.shape)
+
+        tx_train_vectors_csr = csr_matrix(tx_train_vectors)
+        save_npz(feature_file_path, tx_train_vectors_csr)
+        print("Extracted and saved features to file.")
+
+    "-------------------------------------------------------------------------------------------------------"
+    combined_train_vectors = tx_train_vectors
 
     # word2vector features
 
@@ -418,12 +418,12 @@ if __name__ == '__main__':
     # save_npz(os.path.join(".", 'word2vec_train_vectors.npz'), word2vec_train_vectors_csr)
 
     # tfidf features
-    start_time = time.time()
-    tfidf_train_vectors = get_tfidf_vectors(train, columns_to_vectorize)
-    print("get_tfidf_vectors cost: ", time.time() - start_time, "seconds")
-    tfidf_train_vectors_csr = csr_matrix(tfidf_train_vectors)
-    save_npz(os.path.join(".", 'tfidf_train_vectors.npz'), tfidf_train_vectors_csr)
+    # start_time = time.time()
+    # tfidf_train_vectors = get_tfidf_vectors(train, columns_to_vectorize)
+    # print("get_tfidf_vectors cost: ", time.time() - start_time, "seconds")
+    # tfidf_train_vectors_csr = csr_matrix(tfidf_train_vectors)
+    # save_npz(os.path.join(".", 'tfidf_train_vectors.npz'), tfidf_train_vectors_csr)
 
-    train_lgbm(tfidf_train_vectors)
+    train_lgbm_fold(combined_train_vectors)
 
 

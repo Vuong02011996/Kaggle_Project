@@ -46,3 +46,8 @@
   + 1440: 1.019
 + 4
   + 1440: 1.018
+
+# Inference
+
++ Train + infer: https://www.kaggle.com/code/richolson/deberta-tf-idf-word2vec-length
++ Models: https://www.kaggle.com/models/alexxxsem/deberta-v3/PyTorch/large

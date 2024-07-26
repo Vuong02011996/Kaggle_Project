@@ -23,13 +23,13 @@ Model:
         + Feature Extraction: Extracts features from the hidden states which can be used for downstream tasks.
         + Inference: Produces predictions or embeddings from the input data.
 """
-tokenizer = DebertaV2Tokenizer.from_pretrained('/home/oryza/Desktop/KK/Competition_1/models/deberta-v3-small')
+tokenizer = DebertaV2Tokenizer.from_pretrained('/home/oryza/Desktop/KK/Competition_1/models/deberta-v3-pytorch-large-v1')
 
 # .cuda() moves the model to the GPU for faster computation.
-tx_model = DebertaV2Model.from_pretrained('/home/oryza/Desktop/KK/Competition_1/models/deberta-v3-small').cuda()
+tx_model = DebertaV2Model.from_pretrained('/home/oryza/Desktop/KK/Competition_1/models/deberta-v3-pytorch-large-v1').cuda()
 
 
-def batch_extract_tx_features(texts, tokenizer, model, batch_size=3, max_length=3072):
+def batch_extract_tx_features(texts, tokenizer, model, batch_size=3, max_length=1440):
     total_texts = 0
     total_over_max_length = 0
 
