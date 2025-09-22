@@ -1,0 +1,9 @@
+kagglehub
+pandas
+scikit-learn
+ipython
+transformers[torch]
+torch
+datasets
+matplotlib
+peft
